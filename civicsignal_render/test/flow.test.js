@@ -4,6 +4,11 @@ const fs = require('node:fs/promises');
 const os = require('node:os');
 const path = require('node:path');
 const { spawn } = require('node:child_process');
+const { inferCategory } = require('../service-directory');
+
+test('streetlight near a park remains a streetlight issue', () => {
+  assert.equal(inferCategory('A streetlight is out on Fictional Avenue near Sample Park.'), 'Streetlight');
+});
 
 test('clarification, consent, routing and private tracker work together', async () => {
   const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'civicsignal-test-'));

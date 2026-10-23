@@ -15,8 +15,8 @@ function inferCategory(text) {
   const t = text.toLowerCase();
   if (/traffic signal|stoplight|walk signal|pedestrian signal/.test(t)) return 'Traffic signal';
   if (/bus stop|light rail|transit|vta|train station/.test(t)) return 'Transit';
-  if (/park|playground|recreation center/.test(t) && /broken|damage|light|trash|unsafe|repair|maintenance/.test(t)) return 'Park maintenance';
   if (/street ?light|lamp ?post|light pole|broken light|dark street/.test(t)) return 'Streetlight';
+  if (/park|playground|recreation center/.test(t) && /broken|damage|light|trash|unsafe|repair|maintenance/.test(t)) return 'Park maintenance';
   if (/pothole|road hole|hole in the road/.test(t)) return 'Pothole';
   if (/sidewalk|curb|pedestrian path/.test(t)) return 'Sidewalk';
   if (/illegal dump|dumped|dumping|abandoned trash|discarded furniture/.test(t)) return 'Illegal dumping';
