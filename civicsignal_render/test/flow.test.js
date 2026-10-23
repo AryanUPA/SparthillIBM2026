@@ -58,3 +58,40 @@ test('clarification, consent, routing and private tracker work together', async 
     await fs.rm(directory, { recursive: true, force: true });
   }
 });
+
+test('hosted demo drafts without storing or exposing reports', async () => {
+  const directory = await fs.mkdtemp(path.join(os.tmpdir(), 'civicsignal-hosted-test-'));
+  const reportsFile = path.join(directory, 'reports.json');
+  const port = 5200 + Math.floor(Math.random() * 1000);
+  const base = `http://127.0.0.1:${port}`;
+  const child = spawn(process.execPath, ['server.js'], {
+    cwd: path.join(__dirname, '..'),
+    env: { ...process.env, PORT: String(port), CIVICSIGNAL_MODE: 'hosted-demo', CIVICSIGNAL_REPORTS_FILE: reportsFile },
+    stdio: 'ignore'
+  });
+  try {
+    let health;
+    for (let attempt = 0; attempt < 50; attempt++) {
+      try { const response = await fetch(base + '/api/health'); if (response.ok) { health = await response.json(); break; } } catch {}
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    assert.equal(health?.mode, 'hosted-demo');
+    assert.equal(health.saveEnabled, false);
+    assert.equal(health.adminEnabled, false);
+    const issue = { originalDescription: 'A pothole is near the library.', city: 'San José', locationType: 'city', location: '', categoryHint: 'Pothole', clarifications: [] };
+    const analyze = await fetch(base + '/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: base }, body: JSON.stringify(issue) });
+    assert.equal(analyze.status, 200);
+    const crossOrigin = await fetch(base + '/api/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'https://other.example' }, body: JSON.stringify(issue) });
+    assert.equal(crossOrigin.status, 403);
+    const save = await fetch(base + '/api/reports', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    assert.equal(save.status, 403);
+    assert.equal((await fetch(base + '/api/admin/reports')).status, 403);
+    await assert.rejects(fs.stat(reportsFile), { code: 'ENOENT' });
+  } finally {
+    if (child.exitCode === null) {
+      child.kill();
+      await new Promise(resolve => child.once('exit', resolve));
+    }
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});

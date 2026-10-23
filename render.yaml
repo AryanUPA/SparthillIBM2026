@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: civicsignal-preview
+    runtime: node
+    plan: free
+    branch: main
+    rootDir: civicsignal_render
+    buildCommand: node --version
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: CIVICSIGNAL_MODE
+        value: hosted-demo
+      - key: NODE_ENV
+        value: production

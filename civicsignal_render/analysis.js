@@ -26,7 +26,7 @@ function buildDraft(input,category,routeResult,flags) {
   const summary=observed+(details.length?` Additional details: ${details.join('; ')}.`:'');
   const subject=`${category==='Not sure'?'Community concern':category} concern in ${tidy(input.city)}`;
   const location=[input.locationType==='address'?'Street address':input.locationType==='postal'?'ZIP / postal code':'City or neighborhood',tidy(input.location||input.city)].join(': ')+(input.landmark?` · Near ${tidy(input.landmark)}`:'');
-  const nextStep=routeResult.route?`Review the ${routeResult.route.name.toLowerCase()} guidance. Confirm the details on the official page before submitting a request.`:'Review the City of San José report-issues directory or ask a city representative to identify the right department.';
+  const nextStep=routeResult.route?'Review the linked official guidance for this concern. Confirm the details before submitting a request.':'Review the City of San José report-issues directory or ask a city representative to identify the right department.';
   return {subject,summary,location,nextStep,flags};
 }
 async function analyzeIssue(input) {
